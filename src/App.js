@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_KEY = "dbbda79b4a1a4861a30574aeb39660e5";
+const API_KEY = "";
 const API_URL = "https://newsapi.org/v2/everything";
 
 export default function NewsApp() {
