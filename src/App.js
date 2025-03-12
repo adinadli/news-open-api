@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "./styles.css";
 
-const API_KEY = "dbbda79b4a1a4861a30574aeb39660e5";
+const API_KEY = "INSERT_API_KEY";
 const API_URL = "https://newsapi.org/v2/everything";
 
 export default function NewsApp() {
@@ -11,6 +12,10 @@ export default function NewsApp() {
   const [error, setError] = useState(null);
   const pageSize = 6;
   const [user, setUser] = useState(localStorage.getItem("user") || null);
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [credentials, setCredentials] = useState({ username: "", password: "", confirmPassword: "" });
 
   useEffect(() => {
     fetchNews();
@@ -33,9 +38,30 @@ export default function NewsApp() {
     }
   };
 
-  const handleLogin = (username) => {
-    localStorage.setItem("user", username);
-    setUser(username);
+  const handleLogin = () => {
+    if (!credentials.username || !credentials.password) {
+      alert("Please enter both username and password.");
+      return;
+    }
+    localStorage.setItem("user", credentials.username);
+    setUser(credentials.username);
+    setIsPopupOpen(false);
+    setCredentials({ username: "", password: "", confirmPassword: "" });
+  };
+
+  const handleRegister = () => {
+    if (!credentials.username || !credentials.password || !credentials.confirmPassword) {
+      alert("All fields are required.");
+      return;
+    }
+    if (credentials.password !== credentials.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    localStorage.setItem("user", credentials.username);
+    setUser(credentials.username);
+    setIsPopupOpen(false);
+    setCredentials({ username: "", password: "", confirmPassword: "" });
   };
 
   const handleLogout = () => {
@@ -45,10 +71,12 @@ export default function NewsApp() {
 
   return (
     <div className="container">
+      {/* Authentication Section */}
       {!user ? (
         <div className="auth-section">
-          <input type="text" placeholder="Enter username" className="input" id="username" />
-          <button onClick={() => handleLogin(document.getElementById("username").value)} className="btn-login">Login</button>
+          <button onClick={() => { setIsPopupOpen(true); setIsRegister(false); }} className="btn-login">
+            Login / Register
+          </button>
         </div>
       ) : (
         <div className="auth-section">
@@ -56,10 +84,54 @@ export default function NewsApp() {
           <button onClick={handleLogout} className="btn-logout">Logout</button>
         </div>
       )}
+
+      {/* Pop-up Login/Register */}
+      {isPopupOpen && (
+        <div className="popup-overlay">
+          <div className="popup-container">
+            <button className="popup-close" onClick={() => setIsPopupOpen(false)}>×</button>
+            <h2 className="popup-title">{isRegister ? "Register" : "Login"}</h2>
+            <input
+              type="text"
+              placeholder="Username"
+              className="popup-input"
+              value={credentials.username}
+              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            /><br></br>
+            <input
+              type="password"
+              placeholder="Password"
+              className="popup-input"
+              value={credentials.password}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+            /><br></br>
+            {isRegister && (
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                className="popup-input"
+                value={credentials.confirmPassword}
+                onChange={(e) => setCredentials({ ...credentials, confirmPassword: e.target.value })}
+              />
+            )}<br></br>
+            <button className="popup-btn" onClick={isRegister ? handleRegister : handleLogin}>
+              {isRegister ? "Register" : "Login"}
+            </button>
+            <p>
+              {isRegister ? "Already have an account?" : "Don't have an account?"}<br></br>
+              <button className="popup-btn" onClick={() => setIsRegister(!isRegister)}>
+                {isRegister ? "Login" : "Register"}
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* News Section */}
       <h1 className="title">News Search</h1>
-      
       <input type="text" placeholder="Search news..." className="search-input" value={query} onChange={(e) => setQuery(e.target.value)} />
       {error && <p className="error">{error}</p>}
+
       <div className="news-grid">
         {articles.length === 0 && !error ? (
           <p className="no-results">No articles found.</p>
@@ -76,6 +148,8 @@ export default function NewsApp() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
       <div className="pagination">
         <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="btn-page">Prev</button>
         <span className="page-number">Page {page}</span>
