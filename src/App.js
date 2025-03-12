@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./styles.css";
 
+<<<<<<< HEAD
 const API_KEY = "INSERT_API_KEY";
+=======
+const API_KEY = "";
+>>>>>>> 393735b90ca584df510875b2cc77c61c3be2263b
 const API_URL = "https://newsapi.org/v2/everything";
 
 export default function NewsApp() {
